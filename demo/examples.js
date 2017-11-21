@@ -5,9 +5,9 @@ examples.lang = {
 		if(lines[0].startsWith("line")){
 			var index = 0;
 			var perLine = parseInt(lines[0].split(" ")[1]);
-			var tmp = lines;
+			var tmp = lines.slice(1);
 			lines = [];
-			
+
 			while(index < tmp.length){
 				lines.push(tmp.slice(index, index + (perLine + 1)));
 				index = index + (perLine + 1);
