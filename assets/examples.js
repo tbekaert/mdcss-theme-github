@@ -1,11 +1,33 @@
 examples.lang = {
 	color: function (pre, value) {
-		var colors = pre.parentNode.insertBefore(document.createElement('div'), pre);
 		var lines = value.trim().split(/\n+/);
 
-		colors.className = 'colors';
+		if(lines[0].startsWith("line")){
+			var index = 0;
+			var perLine = parseInt(lines[0].split(" ")[1]);
+			var tmp = lines;
+			lines = [];
+			
+			while(index < tmp.length){
+				lines.push(tmp.slice(index, index + (perLine + 1)));
+				index = index + (perLine + 1);
+			}
+			lines.forEach(function(line){
+				var colors = pre.parentNode.insertBefore(document.createElement('div'), pre);
 
-		lines.map(parseLine).map(parseColor).forEach(colors.appendChild, colors);
+				colors.className = 'colors line';
+
+				line.map(parseLine).map(parseColor).forEach(colors.appendChild, colors);
+			})
+		}
+		else{
+			var colors = pre.parentNode.insertBefore(document.createElement('div'), pre);
+
+			colors.className = 'colors';
+
+			lines.map(parseLine).map(parseColor).forEach(colors.appendChild, colors);
+		}
+
 
 		function parseLine(line) {
 			line = line.trim();
@@ -24,24 +46,24 @@ examples.lang = {
 
 			colorNode.className = 'swatch';
 
-			colorNode.style.backgroundColor = color.color;
+			colorNode.style.color = color.color;
 
-			var contrastColor = contrast(color.color);
+			colorNode.setAttribute('data-contrast', contrast(color.color));
 
-			colorNode.style.color = contrastColor;
+			var valueNode = colorNode.appendChild(document.createElement('div'));
 
-			colorNode.style.textShadow = '0 0 1px ' + (contrastColor === '#ffffff' ? '#000000' : '#ffffff');
+			valueNode.className = 'color-value';
 
-			colorNode.appendChild(document.createTextNode(color.color));
+			valueNode.appendChild(document.createTextNode(color.color));
 
 			Object.keys(color).filter(function (key) { return key !== 'color' }).forEach(function (key) {
-				var propertyNode = colorNode.appendChild(document.createElement('div'));
+				var nameNode = colorNode.appendChild(document.createElement('div'));
 
-				propertyNode.className = 'color-property';
+				nameNode.className = 'color-name';
 
-				propertyNode.setAttribute('data-name', key);
+				nameNode.setAttribute('data-contrast', contrast(color.color));
 
-				propertyNode.appendChild(document.createTextNode(color[key]));
+				nameNode.appendChild(document.createTextNode(color[key]));
 			});
 
 			return colorNode;
@@ -64,7 +86,7 @@ examples.lang = {
 			var rgb = getRGB(color);
 			var o   = Math.round(((parseInt(rgb[0]) * 299) + (parseInt(rgb[1]) * 587) + (parseInt(rgb[2]) * 114)) / 1000);
 
-			return o <= 180 ? '#ffffff' : '#000000';
+			return o <= 180 ? 'white ' + o : o <= 245 ? 'black ' + o : 'black-ultra ' + o;
 		}
 	},
 	html: function (pre, value, conf) {
